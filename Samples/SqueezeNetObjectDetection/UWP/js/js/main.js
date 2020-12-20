@@ -101,21 +101,26 @@ function pickImage() {
                             var resultTensor = results.outputs["softmaxout_1"];
                             var resultVector = resultTensor.getAsVectorView();
                             // Find the top 3 probabilities
-                            var indexedResults = [];
-                            for (var i = 0; i < resultVector.length; i++)
+                            var topProbabilities = [ 0.0, 0.0, 0.0 ];
+                            var topProbabilityLabelIndexes = [ 0, 0, 0 ];
+                            // SqueezeNet returns a list of 1000 options, with probabilities for each, loop through all
+                            for (var i = 0, len = resultVector.length; i < len; i++)
                             {
-                                indexedResults.push({index: i, probability: resultVector[i]});
+                                // is it one of the top 3?
+                                for (var j = 0; j < 3; j++)
+                                {
+                                    if (resultVector[i] > topProbabilities[j]) {
+                                        topProbabilityLabelIndexes[j] = i;
+                                        topProbabilities[j] = resultVector[i];
+                                        break;
+                                    }
+                                }
                             }
-                            indexedResults.sort((a, b) => {
-                                if (a.probability < b.probability) return 1;
-                                else if (a.probability > b.probability) return -1;
-                                else return 0;
-                            });
                             // Display the result
                             var message = "";
                             for (var i = 0; i < 3; i++)
                             {
-                                message += "\n" + _labels[indexedResults[i].index] + " with confidence of " + indexedResults[i].probability;
+                                message += "\n" + _labels[topProbabilityLabelIndexes[i]] + " with confidence of " + topProbabilities[i];
                             }
                             // preview the image stream
                             document.getElementById("previewImage").src = URL.createObjectURL(file, { oneTimeOnly: true });

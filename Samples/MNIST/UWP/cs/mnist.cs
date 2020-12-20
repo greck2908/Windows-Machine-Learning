@@ -4,11 +4,7 @@ using System.Threading.Tasks;
 using Windows.Media;
 using Windows.Storage;
 using Windows.Storage.Streams;
-#if USE_WINML_NUGET
-using Microsoft.AI.MachineLearning;
-#else
 using Windows.AI.MachineLearning;
-#endif
 namespace MNIST_Demo
 {
 

@@ -13,7 +13,7 @@ using OpenQA.Selenium.Remote;
 // up to OpenQA.Selenium.Interactions and this alias can simply be removed.
 using PointerInputDevice = OpenQA.Selenium.Appium.Interactions.PointerInputDevice;
 
-namespace SamplesTest
+namespace MnistTest
 {
     public class MnistSession
     {
@@ -27,11 +27,15 @@ namespace SamplesTest
         protected static WindowsElement clearButton;
         protected static WindowsElement numberLabel;
 
-        public void Setup(string appid, string name)
+        public void Setup(string appid)
         {
             if (session == null)
             {
-                session = TestHelper.GetSession(appid, name);
+                DesiredCapabilities appCapabilities = new DesiredCapabilities();
+                appCapabilities.SetCapability("app", appid);
+                appCapabilities.SetCapability("deviceName", "WindowsPC");
+                session = new WindowsDriver<WindowsElement>(new Uri(WindowsApplicationDriverUrl), appCapabilities);
+                Assert.IsNotNull(session);
                 // Set implicit timeout to 1.5 seconds to make element search to retry every 500 ms for at most three times
                 session.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1.5);
                 inkCanvas = session.FindElementByClassName("InkCanvas");
@@ -239,14 +243,12 @@ namespace SamplesTest
     [TestClass]
     public class MnistTestCSharp : MnistSession
     {
-        private const string MNISTAppId_CS = "f330385a-7468-4688-859d-7d11a61d1b29_7td7jx2gva3r8!App";
-        private const string MNISTName_CS = "WinML_Demo";
-
+        private const string MNISTAppId_CS = "f330385a-7468-4688-859d-7d11a61d1b29_atz7ne7vp47fr!App";
 
         [TestInitialize]
         public void TestInitialize()
         {
-            Setup(MNISTAppId_CS, MNISTName_CS);
+            Setup(MNISTAppId_CS);
         }
 
         [TestCleanup()]
@@ -266,13 +268,12 @@ namespace SamplesTest
     [TestClass]
     public class MnistTestCPPCX : MnistSession
     {
-        private const string MNISTAppId_CPPCX = "7c575962-f37f-4240-a2ba-33fbf54c19f6_7td7jx2gva3r8!App";
-        private const string MNISTName_CPPCX = "mnist_cppcx";
+        private const string MNISTAppId_CPPCX = "7c575962-f37f-4240-a2ba-33fbf54c19f6_ms3keja78xfsy!App";
 
         [TestInitialize]
         public void TestInitialize()
         {
-            Setup(MNISTAppId_CPPCX, MNISTName_CPPCX);
+            Setup(MNISTAppId_CPPCX);
         }
 
         [TestCleanup()]

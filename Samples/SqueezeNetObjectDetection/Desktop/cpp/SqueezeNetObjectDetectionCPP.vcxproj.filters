@@ -8,7 +8,15 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="..\..\..\..\SharedContent\models\SqueezeNet.onnx">
+      <Filter>SharedContent</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt" />
+    <Text Include="Labels.txt">
+      <Filter>SharedContent</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="SharedContent">
@@ -16,14 +24,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\..\..\..\SharedContent\models\SqueezeNet.onnx">
+    <Image Include="..\..\..\..\SharedContent\media\kitten_224.png">
       <Filter>SharedContent</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="..\..\..\..\SharedContent\media\kitten_224.png">
-      <Filter>SharedContent</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="Labels.txt">
-      <Filter>SharedContent</Filter>
-    </CopyFileToFolders>
+    </Image>
   </ItemGroup>
 </Project>

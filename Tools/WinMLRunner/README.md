@@ -3,20 +3,12 @@
 
 The WinMLRunner is a command-line based tool that can run .onnx or .pb models where the input and output variables are tensors or images. It will attempt to load, bind, and evaluate a model and output error messages if these steps were unsuccessful. It will also capture performance measurements on the GPU and/or CPU. If using the performance flag, the GPU, CPU and wall-clock times for loading, binding, and evaluating and the CPU and GPU memory usage during evaluation will print to the command line and to a CSV file.
 
-## Getting the tool
-
-You can either download the x64 executable or build it yourself.
-
-### Download
-
-[Download x64 and x86 Exe](https://github.com/Microsoft/Windows-Machine-Learning/releases)
-
-### Build
-
-#### Prerequisites
+## Prerequisites
 - [Visual Studio 2017 Version 15.7.4 or Newer](https://developer.microsoft.com/en-us/windows/downloads)
-- [Windows 10 - Build 17763 or higher](https://www.microsoft.com/en-us/software-download/windowsinsiderpreviewiso)
-- [Windows SDK - Build 18362 or higher](https://www.microsoft.com/en-us/software-download/windowsinsiderpreviewSDK)
+- [Windows 10 - Build 17738 or higher](https://www.microsoft.com/en-us/software-download/windowsinsiderpreviewiso)
+- [Windows SDK - Build 17738 or higher](https://www.microsoft.com/en-us/software-download/windowsinsiderpreviewSDK)
+
+## Build the tool
 
 The easiest way to use these samples without using Git is to download the zip file containing the current version (using the following link or by clicking the "Download ZIP" button on the repo page). You can then unzip the entire archive and use the samples in Visual Studio 2017. Notes: Before you unzip the archive, right-click it, select Properties, and then select Unblock.
 Be sure to unzip the entire archive, and not just individual samples. The samples all depend on the SharedContent folder in the archive. In Visual Studio 2017, the platform target defaults to ARM, so be sure to change that to x64 or x86 if you want to test on a non-ARM device. Reminder: If you unzip individual samples, they will not build due to references to other portions of the ZIP file that were not unzipped. 
@@ -25,84 +17,44 @@ You must unzip the entire archive if you intend to build the samples.
 ## Run the tool
  ```
 Required command-Line arguments:
--model <path>            : Fully qualified path to a .onnx or .pb model file.
+-model <path>         : Fully qualified path to a .onnx or .pb model file.
       or
--folder <path>           : Fully qualifed path to a folder with .onnx and/or .pb models, will run all of the models in the folder.
+-folder <path>        : Fully qualifed path to a folder with .onnx and/or .pb models, will run all of the models in the folder.
 
 #Optional command-line arguments:
--version: prints the version information for this build of WinMLRunner.exe
--CPU : run model on default CPU
--GPU : run model on default GPU
--GPUHighPerformance : run model on GPU with highest performance
--GPUMinPower : run model on GPU with the least power
--GPUAdapterName <adapter name substring>: run model on GPU specified by its name. NOTE: Please only use this flag on DXCore supported machines. You will need to retarget the solution to at least windows insider build 18936
--CreateDeviceOnClient : create the D3D device on the client and pass it to WinML to create session
--CreateDeviceInWinML : create the device inside WinML
--CPUBoundInput : bind the input to the CPU
--GPUBoundInput : bind the input to the GPU
--RGB : load the input as an RGB image
--BGR : load the input as a BGR image
--Tensor [function] : load the input as a tensor, with optional function for input preprocessing
-    Optional function arguments:
-        Identity(default) : No input transformations will be performed.
-        Normalize <scale> <means> <stddevs> : float scale factor and comma separated per channel means and stddev for normalization.
--Perf [all]: capture performance measurements such as timing and memory usage. Specifying "all" will output all measurements
--Iterations : # times perf measurements will be run/averaged. (maximum: 1024 times)
--Input <path to input file>: binds image or CSV to model
--InputImageFolder <path to directory of images> : specify folder of images to bind to model" << std::endl;
--TopK <number>: print top <number> values in the result. Default to 1
--BaseOutputPath [<fully qualified path>] : base output directory path for results, default to cwd
--PerfOutput [<path>] : fully qualified or relative path including csv filename for perf results
--SavePerIterationPerf : save per iteration performance results to csv file
--PerIterationPath <directory_path> : Relative or fully qualified path for per iteration and save tensor output results.  If not specified a default(timestamped) folder will be created.
--SaveTensorData <saveMode>: saveMode: save first iteration or all iteration output tensor results to csv file [First, All]
--DebugEvaluate: Print evaluation debug output to debug console if debugger is present.
--Terse: Terse Mode (suppresses repetitive console output)
--AutoScale <interpolationMode>: Enable image autoscaling and set the interpolation mode [Nearest, Linear, Cubic, Fant]
--GarbageDataMaxValue <maxValue>: Limit generated garbage data to a maximum value.  Helpful if input data is used as an index.
-
-Concurrency Options:
--ConcurrentLoad: load models concurrently
--NumThreads <number>: number of threads to load a model. By default this will be the number of model files to be executed
--ThreadInterval <milliseconds>: interval time between two thread creations in milliseconds
-
+-perf                    : Captures GPU, CPU, and wall-clock time measurements. 
+-iterations <int>	     : Number of times to evaluate the model when capturing performance measurements.
+-CPU             	     : Will create a session on the CPU.
+-GPU            	     : Will create a session on the GPU.
+-GPUMaxPerformance     : Will create a session with the most powerful GPU device available.
+-GPUMinPower           : Will create a session with GPU with the least power.
+-input <image/CSV path>  : Will bind image/data from CSV to model.
+-debug                   : Will start a trace logging session. 
  ```
-
-Note that -CPU, -GPU, -GPUHighPerformance, -GPUMinPower -BGR, -RGB, -tensor, -CPUBoundInput, -GPUBoundInput are not mutually exclusive (i.e. you can combine as many as you want to run the model with different configurations).
-
 ### Examples:
 Run a model on the CPU and GPU separately 5 times and output performance data:
 > WinMLRunner.exe -model c:\\data\\concat.onnx -iterations 5 -perf
 
 Runs all the models in the data folder, captures performance data 3 times using only the CPU: 
-> WinMLRunner.exe -folder c:\\data -perf -iterations 3 -CPU
-
-Run a model on the CPU and GPU separately, and by binding the input to the CPU and the GPU separately (4 total runs):
-> WinMLRunner.exe -model c:\\data\\SqueezeNet.onnx -CPU -GPU -CPUBoundInput -GPUBoundInput
-
-Run a model on the CPU with the input bound to the GPU and loaded as an RGB image:
-> WinMLRunner.exe -model c:\\data\\SqueezeNet.onnx -CPU -GPUBoundInput -RGB
-
-## Using Microsoft.AI.Machinelearning NuGet
-WinMLRunner can be built to use WinML's NuGet package : Microsoft.AI.Machinelearning NuGet. Simply build with the target configuration "Debug_NuGet" or "Release_NuGet". MicrosoftMLRunner.exe will be created and will use ```Microsoft.AI.MachineLearning.dll``` in the immediate directory of the executuble instead of loading ```Windows.AI.MachineLearning.dll``` from System32. MicrosoftMLRunner is useful to compare performance with an older version or testing a newer version of WinML's NuGet. For more information, please reference [Microsoft.AI.MachineLearning NuGet page](https://www.nuget.org/packages/Microsoft.AI.MachineLearning).
+> WinMLRunner .exe -folder c:\\data -perf -iterations 3 -CPU
 
 ## Default output
 
 **Running a good model:**
 Run the executable as shown below. Make sure to replace the install location with what matches yours:
  ```
-.\WinMLRunner.exe -model SqueezeNet.onnx
+ WinMLRunner.exe -model C:\Repos\Windows-Machine-Learning\SharedContent\models\SqueezeNet.onnx 
+
 WinML Runner
 GPU: AMD Radeon Pro WX 3100
 
-Loading model (path = SqueezeNet.onnx)...
 =================================================================
 Name: squeezenet_old
 Author: onnx-caffe2
 Version: 9223372036854775807
 Domain:
 Description:
-Path: SqueezeNet.onnx
+Path: C:\Repos\Windows-Machine-Learning\SharedContent\models\SqueezeNet.onnx
 Support FP16: false
 
 Input Feature Info:
@@ -115,18 +67,32 @@ Feature Kind: Float
 
 =================================================================
 
-Binding (device = CPU, iteration = 1, inputBinding = CPU, inputDataType = Tensor)...[SUCCESS]
-Evaluating (device = CPU, iteration = 1, inputBinding = CPU, inputDataType = Tensor)...[SUCCESS]
-Outputting results..
-Feature Name: softmaxout_1
- resultVector[818] has the maximal value of 1
+Loading model...[SUCCESS]
+Binding Model on GPU...[SUCCESS]
+Evaluating Model on GPU...[SUCCESS]
 
+=================================================================
+Name: squeezenet_old
+Author: onnx-caffe2
+Version: 9223372036854775807
+Domain:
+Description:
+Path: C:\Repos\Windows-Machine-Learning\SharedContent\models\SqueezeNet.onnx
+Support FP16: false
 
-Binding (device = GPU, iteration = 1, inputBinding = CPU, inputDataType = Tensor)...[SUCCESS]
-Evaluating (device = GPU, iteration = 1, inputBinding = CPU, inputDataType = Tensor)...[SUCCESS]
-Outputting results..
-Feature Name: softmaxout_1
- resultVector[818] has the maximal value of 1
+Input Feature Info:
+Name: data_0
+Feature Kind: Float
+
+Output Feature Info:
+Name: softmaxout_1
+Feature Kind: Float
+
+=================================================================
+
+Loading model...[SUCCESS]
+Binding Model on CPU...[SUCCESS]
+Evaluating Model on CPU...[SUCCESS]
  ```
 **Running a bad model:**
 Here's an example of running a model with incorrect parameters:
@@ -193,19 +159,16 @@ Dedicated Memory (MB) - The amount of memory that was used on the VRAM of the de
 Shared Memory (MB) -  The amount of memory that was used on the DRAM by the GPU.
  ### Sample performance output:
  ```
-.\WinMLRunner.exe -model SqueezeNet.onnx -perf
 WinML Runner
-Printing available GPUs with DXGI..
-Index: 0, Description: AMD Radeon Pro WX 3100
+GPU: AMD Radeon Pro WX 3100
 
-Loading model (path = .\SqueezeNet.onnx)...
 =================================================================
 Name: squeezenet_old
 Author: onnx-caffe2
 Version: 9223372036854775807
 Domain:
 Description:
-Path: .\SqueezeNet.onnx
+Path: C:\Repos\Windows-Machine-Learning\SharedContent\models\SqueezeNet.onnx
 Support FP16: false
 
 Input Feature Info:
@@ -218,55 +181,62 @@ Feature Kind: Float
 
 =================================================================
 
+Loading model...[SUCCESS]
+Binding Model on GPU...[SUCCESS]
+Evaluating Model on GPU...[SUCCESS]
 
-Creating Session with CPU device
-Binding (device = CPU, iteration = 1, inputBinding = CPU, inputDataType = Tensor, deviceCreationLocation = WinML)...[SUCCESS]
-Evaluating (device = CPU, iteration = 1, inputBinding = CPU, inputDataType = Tensor, deviceCreationLocation = WinML)...[SUCCESS]
-
-
-Results (device = CPU, numIterations = 1, inputBinding = CPU, inputDataType = Tensor, deviceCreationLocation = WinML):
-
-First Iteration Performance (load, bind, session creation, and evaluate):
-  Load: 436.598 ms
-  Bind: 0.8575 ms
-  Session Creation: 120.181 ms
-  Evaluate: 177.233 ms
-
-  Working Set Memory usage (evaluate): 9.95313 MB
-  Working Set Memory usage (load, bind, session creation, and evaluate): 45.6289 MB
-  Peak Working Set Memory Difference (load, bind, session creation, and evaluate): 46.5625 MB
-
-  Dedicated Memory usage (evaluate): 0 MB
-  Dedicated Memory usage (load, bind, session creation, and evaluate): 0 MB
-
-  Shared Memory usage (evaluate): 0 MB
-  Shared Memory usage (load, bind, session creation, and evaluate): 0 MB
+Wall-clock Time Averages (iterations = 1):
+  Load: 391.556 ms
+  Bind: 10.8784 ms
+  Evaluate: 72.4004 ms
+  Total time: 474.834 ms
 
 
+GPU Time Averages (iterations = 1):
+  Load: N/A
+  Bind: 11.0698 ms
+  Evaluate: 72.8877 ms
+  Total time: 83.9575 ms
+  Dedicated memory usage (evaluate): 13.668 MB
+  Shared memory usage (evaluate): 1 MB
 
 
-Creating Session with GPU: AMD Radeon Pro WX 3100
-Binding (device = GPU, iteration = 1, inputBinding = CPU, inputDataType = Tensor, deviceCreationLocation = WinML)...[SUCCESS]
-Evaluating (device = GPU, iteration = 1, inputBinding = CPU, inputDataType = Tensor, deviceCreationLocation = WinML)...[SUCCESS]
+=================================================================
+Name: squeezenet_old
+Author: onnx-caffe2
+Version: 9223372036854775807
+Domain:
+Description:
+Path: C:\Repos\Windows-Machine-Learning\SharedContent\models\SqueezeNet.onnx
+Support FP16: false
+
+Input Feature Info:
+Name: data_0
+Feature Kind: Float
+
+Output Feature Info:
+Name: softmaxout_1
+Feature Kind: Float
+
+=================================================================
+
+Loading model...[SUCCESS]
+Binding Model on CPU...[SUCCESS]
+Evaluating Model on CPU...[SUCCESS]
+
+Wall-clock Time Averages (iterations = 1):
+  Load: 117.31 ms
+  Bind: 7.233 ms
+  Evaluate: 762.886 ms
+  Total time: 887.428 ms
 
 
-Results (device = GPU, numIterations = 1, inputBinding = CPU, inputDataType = Tensor, deviceCreationLocation = WinML):
-
-First Iteration Performance (load, bind, session creation, and evaluate):
-  Load: 436.598 ms
-  Bind: 5.1858 ms
-  Session Creation: 285.041 ms
-  Evaluate: 25.7202 ms
-
-  Working Set Memory usage (evaluate): 1.21484 MB
-  Working Set Memory usage (load, bind, session creation, and evaluate): 42.8047 MB
-  Peak Working Set Memory Difference (load, bind, session creation, and evaluate): 44.1152 MB
-
-  Dedicated Memory usage (evaluate): 10.082 MB
-  Dedicated Memory usage (load, bind, session creation, and evaluate): 15.418 MB
-
-  Shared Memory usage (evaluate): 1 MB
-  Shared Memory usage (load, bind, session creation, and evaluate): 6.04688 MB
+CPU Time Averages (iterations = 1):
+  Load: 117.581 ms
+  Bind: 7.467 ms
+  Evaluate: 690.129 ms
+  Total time: 815.176 ms
+  Working Set Memory usage (evaluate): 9.77734 MB
  ```
  
  ## Capturing Trace Logs
@@ -274,7 +244,7 @@ First Iteration Performance (load, bind, session creation, and evaluate):
  ```
 logman start winml -ets -o winmllog.etl -nb 128 640 -bs 128
 logman update trace  winml -p {BCAD6AEE-C08D-4F66-828C-4C43461A033D} 0xffffffffffffffff 0xff -ets         
-WinMLRunner.exe -model C:\Repos\Windows-Machine-Learning\SharedContent\models\SqueezeNet.onnx -DebugEvaluate
+WinMLRunner.exe -model C:\Repos\Windows-Machine-Learning\SharedContent\models\SqueezeNet.onnx -debug
 logman stop winml -ets
  ```
 The winmllog.etl file will appear in the same directory as the WinMLRunner.exe. 
@@ -288,12 +258,5 @@ tracerpt.exe winmllog.etl -o logdump.csv -of CSV
 
 2. Windows Performance Analyzer (from Visual Studio)
  * Launch Windows Performance Analyzer and open the winmllog.etl.
-
-## Known issues
-
-- Sequence/Map inputs are not supported yet (the model is just skipped, so it doesn't block other models in a folder);
-- We cannot reliably run multiple models with the `-folder` argument with real data. Since we can only specify 1 input, the size of the input would mismatch with most of the models. Right now, using the `-folder` argument only works well with garbage data;
-- Generating garbage input as Gray or YUV is not currently supported. Ideally, WinMLRunner's garbage data pipeline should support all inputs types that we can give to winml.
-
 ## License
 MIT. See [LICENSE file](https://github.com/Microsoft/Windows-Machine-Learning/blob/master/LICENSE).

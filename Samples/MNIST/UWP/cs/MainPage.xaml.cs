@@ -6,22 +6,17 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.Storage;
 using Windows.UI.Xaml.Media.Imaging;
-#if USE_WINML_NUGET
-using Microsoft.AI.MachineLearning;
-#else
 using Windows.AI.MachineLearning;
-#endif
 using Windows.Media;
 using Windows.Storage.Streams;
-using System.Threading.Tasks;
 
 namespace MNIST_Demo
 {
     public sealed partial class MainPage : Page
     {
-        private mnistModel modelGen;
+        private mnistModel modelGen = new mnistModel();
         private mnistInput mnistInput = new mnistInput();
-        private mnistOutput mnistOutput;
+        private mnistOutput mnistOutput = new mnistOutput();
         //private LearningModelSession    session;
         private Helper helper = new Helper();
         RenderTargetBitmap renderBitmap = new RenderTargetBitmap();
@@ -41,10 +36,10 @@ namespace MNIST_Demo
                     IgnoreTilt = true,
                 }
             );
-            LoadModelAsync();
+            LoadModel();
         }
 
-        private async Task LoadModelAsync()
+        private async void LoadModel()
         {
             //Load a machine learning model
             StorageFile modelFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri($"ms-appx:///Assets/mnist.onnx"));
@@ -61,11 +56,11 @@ namespace MNIST_Demo
             mnistOutput = await modelGen.EvaluateAsync(mnistInput);
 
             //Convert output to datatype
-            IReadOnlyList<float> vectorImage = mnistOutput.Plus214_Output_0.GetAsVectorView();
-            IList<float> imageList = vectorImage.ToList();
+            IReadOnlyList<float> VectorImage = mnistOutput.Plus214_Output_0.GetAsVectorView();
+            IList<float> ImageList = VectorImage.ToList();
 
             //LINQ query to check for highest probability digit
-            var maxIndex = imageList.IndexOf(imageList.Max());
+            var maxIndex = ImageList.IndexOf(ImageList.Max());
 
             //Display the results
             numberLabel.Text = maxIndex.ToString();
